@@ -1,24 +1,256 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Personal Website</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+  <title>Maths Workshop Poster</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* Text styling and container based on your provided code, with larger fonts */
+    body {
+      margin: 0;
+      padding: 2rem;
+      background-color: #2a0944;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+    }
+    .container {
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      color: white;
+      z-index: 1;
+    }
+    h1 {
+      font-size: 3.5rem;
+      margin-bottom: 1.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    h2 {
+      margin: 1.5rem 0;
+      color: #ffd700;
+      font-size: 2rem;
+    }
+    p {
+      font-size: 1.5rem;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      font-size: 1.2rem;
+    }
+    li {
+      margin: 0.8rem 0;
+    }
+    li::before {
+      content: "\25AA";
+      margin-right: 10px;
+      color: #000000;
+      font-size: 0.8em;
+    }
+    /* Canvas for background diagrams */
+    #backgroundCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+  </style>
 </head>
 <body>
+  <!-- Canvas for background diagrams -->
+  <canvas id="backgroundCanvas"></canvas>
+  
+  <!-- Container for text content -->
   <div class="container">
-    <!-- Sidebar: Table of Contents -->
-    <div class="sidebar">
-      <a href="blog-post-1.html" class="toc-item">Blog Post 1</a>
-      <a href="blog-post-2.html" class="toc-item">Blog Post 2</a>
-      <a href="blog-post-3.html" class="toc-item">Blog Post 3</a>
-    </div>
-    <!-- Main Content -->
-    <div class="content">
-      <h1>Welcome</h1>
-      <p>This is the introduction about myself. Please select a blog post from the sidebar.</p>
-    </div>
+    <h1>Dynamics of ODEs and PDEs</h1>
+    <h2>Forces on Theoretical and Numerical Aspects</h2>
+    <p>Organized by Forum for Pushing the Boundary</p>
+    <p>Via Zoom | Saturday Night 8:30 - 11:00</p>
+    <h2>Topics of Discussion:</h2>
+    <ul>
+      <li>Functional Analysis</li>
+      <li>Calculus on Banach Spaces</li>
+      <li>Semigroup Theory</li>
+      <li>Perbutation Analysis</li>
+      <li>Numerical Simulation</li>
+      <li>Non-Linear Dynamics</li>
+    </ul>
   </div>
+  
+  <script>
+    // Set up canvas and context
+    const canvas = document.getElementById('backgroundCanvas');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      drawBackgroundDiagrams();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    
+    /* ----------------------------- */
+    /* Diagram Drawing Functions     */
+    /* ----------------------------- */
+    
+    // 1. Lorenz Attractor (simulate "butterfly" shape)
+    function drawLorenz(ctx) {
+      const sigma = 10, beta = 8/3, rho = 28;
+      const dt = 0.005;
+      let x = 0.1, y = 0, z = 0;
+      let points = [];
+      for (let i = 0; i < 5000; i++) {
+        let dx = sigma * (y - x);
+        let dy = x * (rho - z) - y;
+        let dz = x * y - beta * z;
+        x += dx * dt;
+        y += dy * dt;
+        z += dz * dt;
+        points.push({ px: x, py: z });
+      }
+      let xs = points.map(p => p.px);
+      let ys = points.map(p => p.py);
+      const minX = Math.min(...xs), maxX = Math.max(...xs);
+      const minY = Math.min(...ys), maxY = Math.max(...ys);
+      const scaleX = 200 / (maxX - minX);
+      const scaleY = 200 / (maxY - minY);
+      ctx.beginPath();
+      points.forEach((p, i) => {
+        let px = (p.px - minX) * scaleX;
+        let py = (p.py - minY) * scaleY;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      });
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    
+    // 2. Crank–Nicolson Scheme (grid with overlay curve)
+    function drawCrankNicolson(ctx) {
+      const width = 500, height = 150;
+      const cols = 15, rows = 10;
+      const cellWidth = width / cols;
+      const cellHeight = height / rows;
+      
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      for (let i = 0; i <= cols; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * cellWidth, 0);
+        ctx.lineTo(i * cellWidth, height);
+        ctx.stroke();
+      }
+      for (let j = 0; j <= rows; j++) {
+        ctx.beginPath();
+        ctx.moveTo(0, j * cellHeight);
+        ctx.lineTo(width, j * cellHeight);
+        ctx.stroke();
+      }
+      
+      ctx.beginPath();
+      for (let i = 0; i <= cols; i++) {
+        let x = i * cellWidth;
+        let y = height / 2 + Math.sin(i / cols * Math.PI * 2) * cellHeight * 2;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+    
+    // 3. KdV Soliton Panel: Draw coordinate axes and plot three soliton curves
+    //    The curves are defined on:
+    //      (a) x in [–20,20] with offset 0 (time 1),
+    //      (b) x in [–10,30] with offset 10/3 (time 2),
+    //      (c) x in [0,40] with offset 20/3 (time 3).
+    function drawKdVSolitons(ctx) {
+      const plotWidth = 500, plotHeight = 150;
+      // Define the plotting coordinate system:
+      // We'll set x from –20 to 40 and y from –1 to 8.
+      const x_min = -20, x_max = 30;
+      const y_min = -1, y_max = 8;
+      
+      // Mapping functions:
+      function mapX(x) {
+        return ((x - x_min) / (x_max - x_min)) * plotWidth;
+      }
+      function mapY(y) {
+        return plotHeight - ((y - y_min) / (y_max - y_min)) * plotHeight;
+      }
+      
+      // Draw coordinate axes (if they fall in the plotting range)
+      ctx.strokeStyle = 'rgba(200,200,200,0.8)';
+      ctx.lineWidth = 1;
+      // x-axis (y=0)
+      if (0 >= y_min && 0 <= y_max) {
+        ctx.beginPath();
+        ctx.moveTo(mapX(x_min), mapY(0));
+        ctx.lineTo(mapX(x_max), mapY(0));
+        ctx.stroke();
+      }
+      // y-axis (x=0)
+      if (0 >= x_min && 0 <= x_max) {
+        ctx.beginPath();
+        ctx.moveTo(mapX(0), mapY(y_min));
+        ctx.lineTo(mapX(0), mapY(y_max));
+        ctx.stroke();
+      }
+      
+      // Define the soliton shape as u(x) = sech²(0.5*(x – center))
+      function solitonValue(x, center) {
+        return 4/ Math.pow(Math.cosh(1.5 * (x - center)), 2);
+      }
+      
+      // Define three cases:
+      const cases = [
+        { x_start: -20, x_end: 30, center: 0, offset: 0, color: 'rgba(255,255,255,0.8)' },
+        { x_start: -10, x_end: 30, center: 10, offset: 10/3, color: 'rgba(255,200,200,0.8)' },
+        { x_start: 0,   x_end: 30, center: 20, offset: 20/3, color: 'rgba(200,255,200,0.8)' }
+      ];
+      
+      cases.forEach(function(c) {
+        ctx.beginPath();
+        const numSamples = 300;
+        for (let i = 0; i <= numSamples; i++) {
+          let x = c.x_start + (c.x_end - c.x_start) * (i / numSamples);
+          let y = solitonValue(x, c.center) + c.offset;
+          if (i === 0) ctx.moveTo(mapX(x), mapY(y));
+          else ctx.lineTo(mapX(x), mapY(y));
+        }
+        ctx.strokeStyle = c.color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+      
+      // Optionally, draw a label indicating "KdV Soliton Evolution" (not required but may help)
+      ctx.font = "16px Arial";
+      ctx.fillStyle = "rgba(200,200,200,0.6)";
+      ctx.fillText("Soliton Evolution", 10, 20);
+    }
+    
+    // -----------------------------
+    // Position and draw all diagrams
+    // -----------------------------
+    function drawBackgroundDiagrams() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Lorenz attractor (Butterfly) in top-left
+      ctx.save();
+      ctx.translate(100, 100);
+      drawLorenz(ctx);
+      ctx.restore();
+      
+      // Crank–Nicolson scheme in bottom-left
+      ctx.save();
+      ctx.translate(100, canvas.height - 250);
+      drawCrankNicolson(ctx);
+      ctx.restore();
+      
+      // KdV soliton panel on the same level as the bottom graph, positioned to the right
+      ctx.save();
+      ctx.translate(canvas.width - 550, canvas.height - 250);
+      drawKdVSolitons(ctx);
+      ctx.restore();
+    }
+  </script>
 </body>
 </html>
